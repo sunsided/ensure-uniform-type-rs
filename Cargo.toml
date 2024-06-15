@@ -1,6 +1,6 @@
 [package]
 name = "ensure-uniform-type"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Markus Mayer <widemeadows@gmail.com>"]
 description = "Ensures a type only uses uniform fields"
 keywords = ["template", "proc_macro", "procmacro"]
