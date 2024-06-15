@@ -1,6 +1,9 @@
 //! # Ensure uniform field types
 //!
-//! A compile-time check to ensure that a type uses uniform types across its fields. For example:
+//! A compile-time check to ensure that a type uses uniform types across its fields.
+//! 
+//! An example use for this macro is to ensure that a struct `#[repr(C)]` layout can
+//! be correctly mapped onto a slice of the (uniform) field type.
 //!
 //! ## Note
 //!
@@ -22,7 +25,7 @@
 //! }
 //! ```
 //!
-//! The above would fail with the error:
+//! The above would fail to compile, instead giving the error:
 //!
 //! ```plain
 //! error: Struct DifferentialDriveState has fields of different types. Expected uniform use of T, found u32 in field lol.
@@ -58,7 +61,7 @@ use syn::{parse_macro_input, ItemStruct};
 
 /// # Ensure uniform field types
 ///
-/// A compile-time check to ensure that a type uses uniform types across its fields. For example:
+/// A compile-time check to ensure that a type uses uniform types across its fields.
 ///
 /// ## Note
 ///
@@ -66,7 +69,7 @@ use syn::{parse_macro_input, ItemStruct};
 ///
 /// ## Examples
 ///
-/// Assume the following type:
+/// The above would fail to compile, instead giving the error:
 ///
 /// ```compile_fail
 /// #[ensure_uniform_type::ensure_uniform_type]

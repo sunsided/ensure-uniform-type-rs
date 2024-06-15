@@ -1,6 +1,13 @@
 # Ensure uniform field types
 
-A compile-time check to ensure that a type uses uniform types across its fields. For example:
+A compile-time check to ensure that a type uses uniform types across its fields.
+
+An example use for this macro is to ensure that a struct `#[repr(C)]` layout can
+be correctly mapped onto a slice of the (uniform) field type.
+
+## Example
+
+Assume the following type:
 
 ```
 #[ensure_uniform_type]
@@ -14,7 +21,7 @@ pub struct Example<T>
 }
 ```
 
-The above would fail with the error:
+The above would fail to compile, instead giving the error:
 
 ```
 error: Struct DifferentialDriveState has fields of different types. Expected uniform use of T, found u32 in field lol.
