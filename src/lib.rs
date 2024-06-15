@@ -28,7 +28,7 @@
 //! The above would fail to compile, instead giving the error:
 //!
 //! ```plain
-//! error: Struct DifferentialDriveState has fields of different types. Expected uniform use of T, found u32 in field lol.
+//! error: Struct DifferentialDriveState has fields of different types. Expected uniform use of T, found u32 in field offending.
 //! --> src/differential_drive.rs:16:1
 //! |
 //! 16 | / /// A state of a differential drive robot, or differential wheeled robot.
@@ -86,7 +86,7 @@ use syn::{parse_macro_input, ItemStruct};
 /// The above would fail with the error:
 ///
 /// ```plain
-/// error: Struct DifferentialDriveState has fields of different types. Expected uniform use of T, found u32 in field lol.
+/// error: Struct DifferentialDriveState has fields of different types. Expected uniform use of T, found u32 in field offending.
 /// --> src/differential_drive.rs:16:1
 /// |
 /// 16 | / /// A state of a differential drive robot, or differential wheeled robot.

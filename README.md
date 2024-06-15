@@ -1,5 +1,10 @@
 # `#[ensure_uniform_type]`: Ensure uniform struct field types at compile-time
 
+[![Crates.io](https://img.shields.io/crates/v/ensure-uniform-type)](https://crates.io/crates/ensure-uniform-type)
+[![Crates.io](https://img.shields.io/crates/l/ensure-uniform-type)](https://crates.io/crates/ensure-uniform-type)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/sunsided/ensure-uniform-type-rs/rust.yml)
+[![docs.rs](https://img.shields.io/docsrs/ensure-uniform-type)](https://docs.rs/ensure-uniform-type/)
+
 A compile-time check to ensure that a type uses uniform types across its fields.
 
 An example use for this macro is to ensure that a struct `#[repr(C)]` layout can
@@ -24,7 +29,7 @@ pub struct Example<T>
 The above would fail to compile, instead giving the error:
 
 ```
-error: Struct DifferentialDriveState has fields of different types. Expected uniform use of T, found u32 in field lol.
+error: Struct DifferentialDriveState has fields of different types. Expected uniform use of T, found u32 in field offending.
   --> src/differential_drive.rs:16:1
    |
 16 | / /// A state of a differential drive robot, or differential wheeled robot.
