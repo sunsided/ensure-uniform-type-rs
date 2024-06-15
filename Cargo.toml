@@ -1,0 +1,17 @@
+[package]
+name = "ensure-uniform-type"
+version = "0.1.0"
+authors = ["Markus Mayer <widemeadows@gmail.com>"]
+description = "Ensures a type only uses uniform fields"
+keywords = ["template", "proc_macro", "procmacro"]
+license = "EUPL-1.2"
+edition = "2018"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = "1"
+proc-macro2 = "1.0"
+syn = { version = "2.0", features = ["full"] }
+
