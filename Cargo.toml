@@ -4,6 +4,9 @@ version = "0.1.0"
 authors = ["Markus Mayer <widemeadows@gmail.com>"]
 description = "Ensures a type only uses uniform fields"
 keywords = ["template", "proc_macro", "procmacro"]
+categories = ["development-tools", "development-tools::ffi"]
+repository = "https://github.com/sunsided/ensure-uniform-type-rs"
+homepage = "https://github.com/sunsided/ensure-uniform-type-rs"
 license = "EUPL-1.2"
 edition = "2018"
 
