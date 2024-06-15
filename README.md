@@ -1,4 +1,4 @@
-# Ensure uniform field types
+# `#[ensure_uniform_type]`: Ensure uniform struct field types at compile-time
 
 A compile-time check to ensure that a type uses uniform types across its fields.
 
@@ -9,7 +9,7 @@ be correctly mapped onto a slice of the (uniform) field type.
 
 Assume the following type:
 
-```
+```rust
 #[ensure_uniform_type]
 pub struct Example<T>
 {
