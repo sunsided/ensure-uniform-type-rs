@@ -1,65 +1,9 @@
-//! # `#[ensure_uniform_type]`: Ensure uniform struct field types at compile-time
-//!
-//! A compile-time check to ensure that a type uses uniform types across its fields.
-//!
-//! An example use for this macro is to ensure that a struct `#[repr(C)]` layout can
-//! be correctly mapped onto a slice of the (uniform) field type.
-//!
-//! ## Note
-//!
-//! The type check is currently name-based: `f32` and `std::primitive::f32`,
-//! or a type and its alias, count as different types.
-//!
-//! ## Examples
-//!
-//! Assume the following type:
-//!
-//! ```compile_fail
-//! #[ensure_uniform_type::ensure_uniform_type]
-//! pub struct Example<T>
-//! {
-//!     /// First field
-//!     x: T,
-//!
-//!     // Different type
-//!     offending: u32,
-//! }
-//! ```
-//!
-//! The above would fail to compile, instead giving the error:
-//!
-//! ```plain
-//! error: Struct Example has fields of different types. Expected uniform use of T, found u32 in field offending.
-//!   --> src/lib.rs:8:16
-//!    |
-//!  8 |     offending: u32,
-//!    |                ^^^
-//! ```
-//!
-//! By contrast, the following would compile without an error:
-//!
-//! ```
-//! #[ensure_uniform_type::ensure_uniform_type]
-//! pub struct Example<T>
-//! {
-//!     x: T,
-//!     not_offending: T,
-//! }
-//! ```
-//!
-//! Tuple structs are supported as well:
-//!
-//! ```
-//! #[ensure_uniform_type::ensure_uniform_type]
-//! #[repr(C)]
-//! pub struct Vec3(f32, f32, f32);
-//! ```
-
-#![deny(unsafe_code)]
+#![doc = include_str!("../README.md")]
+#![forbid(unsafe_code)]
 
 use proc_macro::TokenStream;
 
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::ItemStruct;
 
 /// # Ensure uniform field types
@@ -84,30 +28,55 @@ pub fn ensure_uniform_type(_attr: TokenStream, item: TokenStream) -> TokenStream
 fn expand(item: proc_macro2::TokenStream) -> syn::Result<proc_macro2::TokenStream> {
     let input: ItemStruct = syn::parse2(item)?;
 
-    let mut fields = input.fields.iter().enumerate();
-    if let Some((_, first)) = fields.next() {
-        let first_type = &first.ty;
-        // Name-based: syn::Type has no semantic equality, so compare the printed tokens.
-        let expected = quote!(#first_type).to_string();
-
-        for (index, field) in fields {
-            let field_type = &field.ty;
-            let found = quote!(#field_type).to_string();
-            if expected != found {
-                let field_name = field
-                    .ident
-                    .as_ref()
-                    .map_or_else(|| index.to_string(), ToString::to_string);
-                let message = format!(
-                    "Struct {} has fields of different types. Expected uniform use of {}, found {} in field {}.",
-                    input.ident, expected, found, field_name
-                );
-                return Err(syn::Error::new_spanned(field_type, message));
-            }
-        }
+    if let Some(error) = first_mismatch(&input) {
+        return Err(error);
     }
 
     Ok(input.into_token_stream())
+}
+
+/// Returns an error for the first field whose type differs from the first field's type.
+///
+/// `None` means all fields share one type; structs without fields are trivially uniform.
+fn first_mismatch(input: &ItemStruct) -> Option<syn::Error> {
+    let mut fields = input.fields.iter().enumerate();
+    let (_, first) = fields.next()?;
+    let expected = type_name(&first.ty);
+
+    fields.find_map(|(index, field)| {
+        let found = type_name(&field.ty);
+        (found != expected).then(|| mismatch_error(input, index, field, &expected, &found))
+    })
+}
+
+/// Prints a type as tokens, which is what the uniformity check compares.
+///
+/// Name-based: `syn::Type` has no semantic equality, so `f32` and `std::primitive::f32`
+/// print, and therefore compare, differently.
+fn type_name(ty: &syn::Type) -> String {
+    quote!(#ty).to_string()
+}
+
+/// Builds the compile error for `field`, spanned on its type so the compiler points at it.
+///
+/// `index` is the field's position, used as its name in tuple structs.
+fn mismatch_error(
+    input: &ItemStruct,
+    index: usize,
+    field: &syn::Field,
+    expected: &str,
+    found: &str,
+) -> syn::Error {
+    let field_name = field
+        .ident
+        .as_ref()
+        .map_or_else(|| index.to_string(), ToString::to_string);
+    let message = format!(
+        "Struct {} has fields of different types. Expected uniform use of {expected}, found {found} in field {field_name}.",
+        input.ident
+    );
+
+    syn::Error::new_spanned(&field.ty, message)
 }
 
 /// Property tests for [`expand`]; the compile-level behavior is covered by `tests/ui.rs`.
