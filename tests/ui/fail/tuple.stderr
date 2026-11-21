@@ -1,0 +1,5 @@
+error: Struct Mixed has fields of different types. Expected uniform use of f32, found f64 in field 2.
+ --> tests/ui/fail/tuple.rs:4:28
+  |
+4 | pub struct Mixed(f32, f32, f64);
+  |                            ^^^

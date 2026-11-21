@@ -7,14 +7,18 @@ keywords = ["template", "proc_macro", "procmacro"]
 categories = ["development-tools", "development-tools::ffi"]
 repository = "https://github.com/sunsided/ensure-uniform-type-rs"
 homepage = "https://github.com/sunsided/ensure-uniform-type-rs"
-license = "EUPL-1.2"
+license = "MIT OR Apache-2.0"
 edition = "2018"
 
 [lib]
 proc-macro = true
 
 [dependencies]
+proc-macro2 = "1"
 quote = "1"
-proc-macro2 = "1.0"
-syn = { version = "2.0", features = ["full"] }
+syn = { version = "3.0", features = ["full"] }
 
+
+[dev-dependencies]
+proptest = "1"
+trybuild = "1"

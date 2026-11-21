@@ -7,7 +7,8 @@
 //!
 //! ## Note
 //!
-//! The type check is currently name-based.
+//! The type check is currently name-based: `f32` and `std::primitive::f32`,
+//! or a type and its alias, count as different types.
 //!
 //! ## Examples
 //!
@@ -28,16 +29,11 @@
 //! The above would fail to compile, instead giving the error:
 //!
 //! ```plain
-//! error: Struct DifferentialDriveState has fields of different types. Expected uniform use of T, found u32 in field offending.
-//! --> src/differential_drive.rs:16:1
-//! |
-//! 16 | / /// A state of a differential drive robot, or differential wheeled robot.
-//! 18 | | #[ensure_uniform_type]
-//! 19 | | pub struct Example<T>
-//! ...  |
-//! 37 | |     offending: u32,
-//! 38 | | }
-//! | |_^
+//! error: Struct Example has fields of different types. Expected uniform use of T, found u32 in field offending.
+//!   --> src/lib.rs:8:16
+//!    |
+//!  8 |     offending: u32,
+//!    |                ^^^
 //! ```
 //!
 //! By contrast, the following would compile without an error:
@@ -50,100 +46,139 @@
 //!     not_offending: T,
 //! }
 //! ```
+//!
+//! Tuple structs are supported as well:
+//!
+//! ```
+//! #[ensure_uniform_type::ensure_uniform_type]
+//! #[repr(C)]
+//! pub struct Vec3(f32, f32, f32);
+//! ```
 
 #![deny(unsafe_code)]
 
-extern crate proc_macro;
 use proc_macro::TokenStream;
 
-use quote::quote;
-use syn::{parse_macro_input, ItemStruct};
+use quote::{quote, ToTokens};
+use syn::ItemStruct;
 
 /// # Ensure uniform field types
 ///
-/// A compile-time check to ensure that a type uses uniform types across its fields.
+/// A compile-time check to ensure that a struct uses the same type for all of its fields.
+/// Works on structs with named fields and on tuple structs; unit and empty structs
+/// are trivially uniform. See the [crate documentation](crate) for examples.
 ///
 /// ## Note
 ///
 /// The type check is currently name-based.
-///
-/// ## Examples
-///
-/// The above would fail to compile, instead giving the error:
-///
-/// ```compile_fail
-/// #[ensure_uniform_type::ensure_uniform_type]
-/// pub struct Example<T>
-/// {
-///     /// First field
-///     x: T,
-///
-/// // Different type
-///     offending: u32,
-/// }
-/// ```
-///
-/// The above would fail with the error:
-///
-/// ```plain
-/// error: Struct DifferentialDriveState has fields of different types. Expected uniform use of T, found u32 in field offending.
-/// --> src/differential_drive.rs:16:1
-/// |
-/// 16 | / /// A state of a differential drive robot, or differential wheeled robot.
-/// 18 | | #[ensure_uniform_type]
-/// 19 | | pub struct Example<T>
-/// ...  |
-/// 37 | |     offending: u32,
-/// 38 | | }
-/// | |_^
-/// ```
-///
-/// By contrast, the following would compile without an error:
-///
-/// ```
-/// #[ensure_uniform_type::ensure_uniform_type]
-/// pub struct Example<T>
-/// {
-///     x: T,
-///     not_offending: T,
-/// }
-/// ```
 #[proc_macro_attribute]
 pub fn ensure_uniform_type(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(item as ItemStruct);
+    expand(item.into())
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
+}
 
-    let struct_name = &input.ident;
-    let fields = if let syn::Fields::Named(fields) = &input.fields {
-        &fields.named
-    } else {
-        unimplemented!("Only named fields are supported")
-    };
+/// Checks that all fields of the struct in `item` share one type and returns the struct unchanged.
+///
+/// Uses `proc_macro2` so the logic can run outside the compiler, in unit and property tests.
+fn expand(item: proc_macro2::TokenStream) -> syn::Result<proc_macro2::TokenStream> {
+    let input: ItemStruct = syn::parse2(item)?;
 
-    // Assume the first field type is the required uniform size type
-    let first_field_type = &fields.first().unwrap().ty;
+    let mut fields = input.fields.iter().enumerate();
+    if let Some((_, first)) = fields.next() {
+        let first_type = &first.ty;
+        // Name-based: syn::Type has no semantic equality, so compare the printed tokens.
+        let expected = quote!(#first_type).to_string();
 
-    // HACK: We cannot compare syn::Type instances directly, so we instead compare them by name.
-    let first_field_type = quote!(#first_field_type).to_string();
-
-    for field in fields {
-        let field_name = field.ident.as_ref().expect("expected named field");
-        let field_type = &field.ty;
-        let field_type = quote!(#field_type).to_string();
-
-        if first_field_type != field_type {
-            let error_message = format!(
-                "Struct {} has fields of different types. Expected uniform use of {}, found {} in field {}.",
-                struct_name,
-                first_field_type,
-                field_type,
-                field_name
-            );
-            return syn::Error::new_spanned(input, error_message)
-                .to_compile_error()
-                .into();
+        for (index, field) in fields {
+            let field_type = &field.ty;
+            let found = quote!(#field_type).to_string();
+            if expected != found {
+                let field_name = field
+                    .ident
+                    .as_ref()
+                    .map_or_else(|| index.to_string(), ToString::to_string);
+                let message = format!(
+                    "Struct {} has fields of different types. Expected uniform use of {}, found {} in field {}.",
+                    input.ident, expected, found, field_name
+                );
+                return Err(syn::Error::new_spanned(field_type, message));
+            }
         }
     }
-    TokenStream::from(quote! {
-        #input
-    })
+
+    Ok(input.into_token_stream())
+}
+
+/// Property tests for [`expand`]; the compile-level behavior is covered by `tests/ui.rs`.
+#[cfg(test)]
+mod tests {
+    use super::expand;
+    use proptest::prelude::*;
+    use quote::ToTokens;
+
+    /// Field types the generated structs pick from; spelled the way `quote` prints them.
+    const TYPES: &[&str] = &[
+        "f32",
+        "u8",
+        "T",
+        "Option < T >",
+        "Vec < u8 >",
+        "[f32 ; 3]",
+        "& 'a str",
+        "std :: primitive :: f32",
+    ];
+
+    /// Builds a named or tuple struct with the given field types.
+    fn make_struct(types: &[&str], tuple: bool) -> String {
+        if tuple {
+            format!("pub struct S<'a, T>({});", types.join(", "))
+        } else {
+            let fields: Vec<String> = types
+                .iter()
+                .enumerate()
+                .map(|(i, ty)| format!("f{i}: {ty}"))
+                .collect();
+            format!("pub struct S<'a, T> {{ {} }}", fields.join(", "))
+        }
+    }
+
+    proptest! {
+        /// The macro accepts a struct exactly when all its field types are spelled the same,
+        /// and then returns the struct unchanged.
+        #[test]
+        fn accepts_iff_uniform(
+            types in prop::collection::vec(prop::sample::select(TYPES), 0..6),
+            tuple in any::<bool>(),
+        ) {
+            let source = make_struct(&types, tuple);
+            let item: proc_macro2::TokenStream = source.parse().unwrap();
+            let uniform = types.windows(2).all(|w| w[0] == w[1]);
+
+            match expand(item.clone()) {
+                Ok(output) => {
+                    prop_assert!(uniform, "accepted non-uniform struct: {}", source);
+                    // Compare after a parse round-trip: raw token printing differs in punctuation spacing.
+                    let input = syn::parse2::<syn::ItemStruct>(item).unwrap().into_token_stream();
+                    prop_assert_eq!(output.to_string(), input.to_string());
+                }
+                Err(error) => {
+                    prop_assert!(!uniform, "rejected uniform struct: {}", source);
+                    let first_mismatch = types.iter().position(|t| *t != types[0]).unwrap();
+                    let field = if tuple { first_mismatch.to_string() } else { format!("f{first_mismatch}") };
+                    prop_assert!(
+                        error.to_string().ends_with(&format!("in field {field}.")),
+                        "wrong field in error: {}", error
+                    );
+                }
+            }
+        }
+    }
+
+    /// Non-struct input is rejected with a parse error instead of a panic.
+    #[test]
+    fn rejects_enum() {
+        let item: proc_macro2::TokenStream = "pub enum E { A }".parse().unwrap();
+        assert!(expand(item).is_err());
+    }
 }
