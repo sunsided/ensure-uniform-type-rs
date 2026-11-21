@@ -5,6 +5,12 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.1](https://github.com/sunsided/ensure-uniform-type-rs/compare/v1.0.0...v1.0.1) - 2026-11-21
+
+### Changed
+
+- Lower the MSRV to 1.85
+
 ## [1.0.0](https://github.com/sunsided/ensure-uniform-type-rs/compare/v0.1.1...v1.0.0) - 2026-11-21
 
 ### Added
