@@ -1,6 +1,6 @@
 [package]
 name = "ensure-uniform-type"
-version = "0.1.1"
+version = "1.0.0"
 authors = ["Markus Mayer <widemeadows@gmail.com>"]
 description = "Compile-time check that all fields of a struct share one type"
 keywords = ["proc-macro", "repr-c", "struct", "compile-time", "uniform"]

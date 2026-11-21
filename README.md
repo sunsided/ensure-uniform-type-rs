@@ -17,7 +17,7 @@ be correctly mapped onto a slice of the (uniform) field type.
 
 ```toml
 [dependencies]
-ensure-uniform-type = "0.1"
+ensure-uniform-type = "1"
 ```
 
 Assume the following type:
