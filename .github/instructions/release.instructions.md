@@ -15,6 +15,9 @@ applyTo: "**/Cargo.toml,release-plz.toml,.github/workflows/release-plz.yml,**/CH
   unknown-registry sources. Path dependencies of publishable crates carry a `version`.
 - `rust-version` is a signal, not a contract. Raising it is allowed when a dependency or a
   feature benefits. It needs a minor release and a changelog note, never a patch release.
+- `rust-version` covers the library build only. Dev-dependencies (proptest, trybuild) may need a
+  newer toolchain; the MSRV job checks `--lib`, not `--all-targets`. Edition 2024 sets the floor
+  at 1.85.
 - release-plz runs in git-only mode: it tags and creates GitHub Releases. `publish-crates-io.yml`
   publishes from the tag in the `crates-io` environment, via trusted publishing
   (`id-token: write`, no `CARGO_REGISTRY_TOKEN`). Keep it that way.
