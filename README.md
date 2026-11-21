@@ -1,23 +1,32 @@
 # `#[ensure_uniform_type]`: Ensure uniform struct field types at compile-time
 
-[![Crates.io](https://img.shields.io/crates/v/ensure-uniform-type)](https://crates.io/crates/ensure-uniform-type)
-[![Crates.io](https://img.shields.io/crates/l/ensure-uniform-type)](https://crates.io/crates/ensure-uniform-type)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/sunsided/ensure-uniform-type-rs/rust.yml)
-[![docs.rs](https://img.shields.io/docsrs/ensure-uniform-type)](https://docs.rs/ensure-uniform-type/)
+[![crates.io](https://img.shields.io/crates/v/ensure-uniform-type.svg)](https://crates.io/crates/ensure-uniform-type)
+[![docs.rs](https://img.shields.io/docsrs/ensure-uniform-type)](https://docs.rs/ensure-uniform-type)
+[![CI](https://github.com/sunsided/ensure-uniform-type-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/sunsided/ensure-uniform-type-rs/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/sunsided/ensure-uniform-type-rs/graph/badge.svg)](https://codecov.io/gh/sunsided/ensure-uniform-type-rs)
+[![MSRV](https://img.shields.io/crates/msrv/ensure-uniform-type)](https://crates.io/crates/ensure-uniform-type)
+[![License](https://img.shields.io/crates/l/ensure-uniform-type)](https://github.com/sunsided/ensure-uniform-type-rs#license)
+[![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/)
 
-A compile-time check to ensure that a type uses uniform types across its fields.
+A compile-time check to ensure that a struct uses the same type for all of its fields.
 
 An example use for this macro is to ensure that a struct `#[repr(C)]` layout can
 be correctly mapped onto a slice of the (uniform) field type.
 
-## Example
+## Usage
+
+```toml
+[dependencies]
+ensure-uniform-type = "0.1"
+```
 
 Assume the following type:
 
-```rust
+```rust,compile_fail
+use ensure_uniform_type::ensure_uniform_type;
+
 #[ensure_uniform_type]
-pub struct Example<T>
-{
+pub struct Example<T> {
     /// First field
     x: T,
 
@@ -28,7 +37,7 @@ pub struct Example<T>
 
 The above would fail to compile, instead giving the error:
 
-```
+```text
 error: Struct Example has fields of different types. Expected uniform use of T, found u32 in field offending.
   --> src/lib.rs:8:16
    |
@@ -39,35 +48,45 @@ error: Struct Example has fields of different types. Expected uniform use of T, 
 By contrast, the following would compile without an error:
 
 ```rust
+use ensure_uniform_type::ensure_uniform_type;
+
 #[ensure_uniform_type]
-pub struct Example<T>
-{
+pub struct Example<T> {
     x: T,
     not_offending: T,
 }
 ```
 
-Tuple structs are supported as well:
+Tuple structs are supported as well. Unit and empty structs are trivially uniform.
 
 ```rust
+use ensure_uniform_type::ensure_uniform_type;
+
 #[ensure_uniform_type]
 #[repr(C)]
 pub struct Vec3(f32, f32, f32);
 ```
 
-Note that the check is name-based: `f32` and `std::primitive::f32`, or a type
-and its alias, count as different types.
+The check is name-based: `f32` and `std::primitive::f32`, or a type and its alias,
+count as different types.
+
+## MSRV
+
+The minimum supported Rust version is 1.88. Raising it is not a breaking change; it
+happens in a minor release and is noted in the changelog.
 
 ## License
 
 Licensed under either of
 
-- Apache License, Version 2.0 ([LICENSE-Apache-2.0](LICENSE-Apache-2.0) or <https://www.apache.org/licenses/LICENSE-2.0>)
-- MIT license ([LICENSE-MIT](LICENSE-MIT) or <https://opensource.org/licenses/MIT>)
+- Apache License, Version 2.0 ([LICENSE-Apache-2.0](https://github.com/sunsided/ensure-uniform-type-rs/blob/main/LICENSE-Apache-2.0) or <https://www.apache.org/licenses/LICENSE-2.0>)
+- MIT license ([LICENSE-MIT](https://github.com/sunsided/ensure-uniform-type-rs/blob/main/LICENSE-MIT) or <https://opensource.org/licenses/MIT>)
 
 at your option.
 
-### Contribution
+## Contributing
+
+See [CONTRIBUTING.md](https://github.com/sunsided/ensure-uniform-type-rs/blob/main/CONTRIBUTING.md).
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall be

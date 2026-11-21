@@ -2,11 +2,10 @@
 name = "ensure-uniform-type"
 version = "0.1.1"
 authors = ["Markus Mayer <widemeadows@gmail.com>"]
-description = "Ensures a type only uses uniform fields"
-keywords = ["template", "proc_macro", "procmacro"]
-categories = ["development-tools", "development-tools::ffi"]
+description = "Compile-time check that all fields of a struct share one type"
+keywords = ["proc-macro", "repr-c", "struct", "compile-time", "uniform"]
+categories = ["development-tools", "development-tools::ffi", "rust-patterns"]
 repository = "https://github.com/sunsided/ensure-uniform-type-rs"
-homepage = "https://github.com/sunsided/ensure-uniform-type-rs"
 license = "MIT OR Apache-2.0"
 edition = "2018"
 rust-version = "1.88"
