@@ -173,7 +173,7 @@ jobs:
       - uses: taiki-e/install-action@25f51f6b1bf4e18876107cece836f4f77ac17c8c # v2.90.7
         with:
           tool: cargo-hack
-      - run: cargo hack check --rust-version --workspace --all-targets --ignore-private
+      - run: cargo hack check --rust-version --workspace --lib --ignore-private
 
   mutants:
     name: mutation testing

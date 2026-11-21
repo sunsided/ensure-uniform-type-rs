@@ -140,12 +140,12 @@ tasks:
       - cargo deny --all-features check
 
   msrv:
-    desc: Check every crate on its declared rust-version
+    desc: Check every library on its declared rust-version (dev-dependencies may need newer)
     preconditions:
       - sh: cargo hack --version
         msg: "cargo-hack not found - cargo install --locked cargo-hack"
     cmds:
-      - cargo hack check --rust-version --workspace --all-targets --ignore-private
+      - cargo hack check --rust-version --workspace --lib --ignore-private
 
   coverage:
     desc: Coverage report (lcov.info, gitignored; HTML with -- --html)

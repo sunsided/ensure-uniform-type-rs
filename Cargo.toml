@@ -8,7 +8,7 @@ categories = ["development-tools", "development-tools::ffi", "rust-patterns"]
 repository = "https://github.com/sunsided/ensure-uniform-type-rs"
 license = "MIT OR Apache-2.0"
 edition = "2024"
-rust-version = "1.88"
+rust-version = "1.85"
 
 [lib]
 proc-macro = true

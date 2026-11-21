@@ -72,7 +72,8 @@ count as different types.
 
 ## MSRV
 
-The minimum supported Rust version is 1.88. Raising it is not a breaking change; it
+The minimum supported Rust version is 1.85. It covers the library only; running the
+test suite may need a newer toolchain. Raising it is not a breaking change; it
 happens in a minor release and is noted in the changelog.
 
 ## License
