@@ -3,7 +3,7 @@
 
 use proc_macro::TokenStream;
 
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::ItemStruct;
 
 /// # Ensure uniform field types
