@@ -22,5 +22,5 @@ applyTo: ".github/workflows/**,Taskfile.dist.yaml,**/Taskfile.dist.yaml,.pre-com
   the Taskfile, the hook and the CI `branch` job.
 - New jobs that should gate merges must also be added to branch protection. Mention that in
   the PR.
-- CI jobs in `ci.yml`: branch, fmt, clippy, style, doc, test, coverage, deny, msrv, semver,
-  mutants. Each has a matching task called by `task ci` (coverage and semver excepted).
+- CI jobs in `ci.yml`: branch, fmt, clippy, style, doc, test, coverage, deny, msrv,
+  mutants. Each has a matching task called by `task ci` (coverage excepted).

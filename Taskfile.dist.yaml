@@ -147,14 +147,6 @@ tasks:
     cmds:
       - cargo hack check --rust-version --workspace --all-targets --ignore-private
 
-  semver:
-    desc: Check published library crates for semver violations
-    preconditions:
-      - sh: cargo semver-checks --version
-        msg: "cargo-semver-checks not found - cargo install --locked cargo-semver-checks"
-    cmds:
-      - cargo semver-checks --workspace
-
   coverage:
     desc: Coverage report (lcov.info, gitignored; HTML with -- --html)
     preconditions:

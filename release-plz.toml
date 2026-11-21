@@ -4,8 +4,8 @@
 git_only = true
 # Release only when the release PR is merged, not on every push that bumps a version.
 release_always = false
-# Runs cargo-semver-checks on library crates; API breaks force a major bump.
-semver_check = true
+# cargo-semver-checks cannot check proc-macro crates (no library API surface to compare).
+semver_check = false
 changelog_update = true
 git_release_enable = true
 # Versions are SemVer 2.0; pre-release versions (1.2.0-rc.1) become GitHub pre-releases.
