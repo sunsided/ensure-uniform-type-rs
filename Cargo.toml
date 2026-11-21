@@ -7,7 +7,7 @@ keywords = ["template", "proc_macro", "procmacro"]
 categories = ["development-tools", "development-tools::ffi"]
 repository = "https://github.com/sunsided/ensure-uniform-type-rs"
 homepage = "https://github.com/sunsided/ensure-uniform-type-rs"
-license = "EUPL-1.2"
+license = "MIT OR Apache-2.0"
 edition = "2018"
 
 [lib]
