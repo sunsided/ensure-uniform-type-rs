@@ -1,0 +1,5 @@
+error: Struct Example has fields of different types. Expected uniform use of T, found u32 in field offending.
+ --> tests/ui/fail/named.rs:6:16
+  |
+6 |     offending: u32,
+  |                ^^^

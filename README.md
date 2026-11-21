@@ -29,16 +29,11 @@ pub struct Example<T>
 The above would fail to compile, instead giving the error:
 
 ```
-error: Struct DifferentialDriveState has fields of different types. Expected uniform use of T, found u32 in field offending.
-  --> src/differential_drive.rs:16:1
+error: Struct Example has fields of different types. Expected uniform use of T, found u32 in field offending.
+  --> src/lib.rs:8:16
    |
-16 | / /// A state of a differential drive robot, or differential wheeled robot.
-18 | | #[ensure_uniform_type]
-19 | | pub struct Example<T>
-...  |
-37 | |     offending: u32,
-38 | | }
-   | |_^
+ 8 |     offending: u32,
+   |                ^^^
 ```
 
 By contrast, the following would compile without an error:
@@ -51,6 +46,17 @@ pub struct Example<T>
     not_offending: T,
 }
 ```
+
+Tuple structs are supported as well:
+
+```rust
+#[ensure_uniform_type]
+#[repr(C)]
+pub struct Vec3(f32, f32, f32);
+```
+
+Note that the check is name-based: `f32` and `std::primitive::f32`, or a type
+and its alias, count as different types.
 
 ## License
 
